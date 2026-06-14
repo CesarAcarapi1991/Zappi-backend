@@ -4,7 +4,7 @@
 // Returns refreshed crypto keys. Throws if device is unknown.
 
 import { IDeviceRepository } from '../domain/repositories/IDeviceRepository';
-import { DeviceAuthInput, DeviceCryptoOutput } from '../domain/entities/Device';
+import { DeviceAuthInput, DeviceIdentifyOutput } from '../domain/entities/Device';
 import { z } from 'zod';
 
 const schema = z.object({
@@ -18,7 +18,7 @@ const schema = z.object({
 export class DeviceAuthUseCase {
   constructor(private readonly deviceRepo: IDeviceRepository) {}
 
-  async execute(input: DeviceAuthInput): Promise<DeviceCryptoOutput> {
+  async execute(input: DeviceAuthInput): Promise<DeviceIdentifyOutput> {
     const parsed = schema.safeParse(input);
     if (!parsed.success) {
       throw new Error(`Validation error: ${parsed.error.message}`);

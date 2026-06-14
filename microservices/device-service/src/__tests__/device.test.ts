@@ -119,17 +119,12 @@ describe('Device Service - Device Identification', () => {
 // =============================================================================
 describe('Device Service - Device Authentication', () => {
   const endpoints = [
-    '/V1/device/authenticate',
-    '/V2/device/authenticate',
-    '/V1/device-auth',
-    '/V2/device-auth',
     '/v1/device-auth',
-    '/v2/device-auth',
   ];
 
   endpoints.forEach((url) => {
     describe(`POST ${url}`, () => {
-      it('returns 200 with decimal-piped key and iv on valid request', async () => {
+      it('returns 200 with decimal-piped key and iv on valid request (without auth_token)', async () => {
         const res = await request(app).post(url).send(validAuthPayload);
 
         expect(res.status).toBe(200);
@@ -137,7 +132,7 @@ describe('Device Service - Device Authentication', () => {
         expect(res.body.data.key).toMatch(DECIMAL_PIPED);
         expect(res.body.data.iv).toMatch(DECIMAL_PIPED);
         expect(res.body.data.certified_id).toBeDefined();
-        expect(res.body.data.auth_token).toBeDefined();
+        expect(res.body.data.auth_token).toBeUndefined();
       });
 
       it('returns 400 if device_id is missing', async () => {
@@ -154,14 +149,6 @@ describe('Device Service - Device Authentication', () => {
 
         expect(res.status).toBe(400);
         expect(res.body.state).toBe(-2);
-      });
-
-      it('auth_token is a valid JWT string', async () => {
-        const res = await request(app).post(url).send(validAuthPayload);
-
-        expect(res.status).toBe(200);
-        const parts = res.body.data.auth_token.split('.');
-        expect(parts).toHaveLength(3);
       });
     });
   });

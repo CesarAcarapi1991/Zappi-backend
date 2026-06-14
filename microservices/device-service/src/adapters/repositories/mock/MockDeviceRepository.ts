@@ -32,13 +32,12 @@ export class MockDeviceRepository implements IDeviceRepository {
     deviceId: string,
     deviceType: string,
     _encryptedDevice?: string,
-  ): Promise<DeviceCryptoOutput | null> {
+  ): Promise<DeviceIdentifyOutput | null> {
     // In mock mode, always consider device as registered
     const { certifiedId } = this.store.get(deviceId) ?? { certifiedId: 1 };
 
     const { key, iv } = generateDeviceCrypto();
-    const auth_token = signDeviceToken({ deviceId, certifiedId });
 
-    return { key, iv, certified_id: certifiedId, auth_token };
+    return { key, iv, certified_id: certifiedId };
   }
 }

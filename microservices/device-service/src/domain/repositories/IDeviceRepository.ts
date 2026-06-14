@@ -24,5 +24,5 @@ export interface IDeviceRepository {
     deviceId: string,
     deviceType: string,
     encryptedDevice?: string,
-  ): Promise<DeviceCryptoOutput | null>;
+  ): Promise<DeviceIdentifyOutput | null>;
 }

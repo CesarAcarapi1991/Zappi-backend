@@ -39,7 +39,7 @@ export class PgDeviceRepository implements IDeviceRepository {
     deviceId: string,
     deviceType: string,
     encryptedDevice?: string,
-  ): Promise<DeviceCryptoOutput | null> {
+  ): Promise<DeviceIdentifyOutput | null> {
     const pool = getPool();
     const { key, iv } = generateDeviceCrypto();
 
@@ -54,8 +54,7 @@ export class PgDeviceRepository implements IDeviceRepository {
     if (result.rowCount === 0) return null;
 
     const certifiedId = result.rows[0].id;
-    const auth_token = signDeviceToken({ deviceId, certifiedId });
 
-    return { key, iv, certified_id: certifiedId, auth_token };
+    return { key, iv, certified_id: certifiedId };
   }
 }
