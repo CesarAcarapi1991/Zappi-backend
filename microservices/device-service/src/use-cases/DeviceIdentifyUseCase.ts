@@ -1,10 +1,9 @@
 // ─── Use Case: DeviceIdentifyUseCase ─────────────────────────────────────────
-// POST /V1/device/identification
 // Business rule: Any device can identify itself on first contact.
 // Returns encryption keys and a device-scoped auth token.
 
 import { IDeviceRepository } from '../domain/repositories/IDeviceRepository';
-import { DeviceIdentifyInput, DeviceCryptoOutput } from '../domain/entities/Device';
+import { DeviceIdentifyInput, DeviceIdentifyOutput } from '../domain/entities/Device';
 import { z } from 'zod';
 
 // Input validation schema (OWASP A03 - Input Validation)
@@ -22,9 +21,9 @@ const schema = z.object({
 });
 
 export class DeviceIdentifyUseCase {
-  constructor(private readonly deviceRepo: IDeviceRepository) {}
+  constructor(private readonly deviceRepo: IDeviceRepository) { }
 
-  async execute(input: DeviceIdentifyInput): Promise<DeviceCryptoOutput> {
+  async execute(input: DeviceIdentifyInput): Promise<DeviceIdentifyOutput> {
     // Validate input
     const parsed = schema.safeParse(input);
     if (!parsed.success) {

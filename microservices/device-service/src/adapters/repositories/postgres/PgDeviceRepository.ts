@@ -3,7 +3,7 @@
 // Connects to real Aurora Serverless v2 via RDS Proxy in AWS.
 
 import { IDeviceRepository } from '../../../domain/repositories/IDeviceRepository';
-import { DeviceCryptoOutput } from '../../../domain/entities/Device';
+import { DeviceCryptoOutput, DeviceIdentifyOutput } from '../../../domain/entities/Device';
 import { generateDeviceCrypto, signDeviceToken } from '../../../infrastructure/crypto';
 import { getPool } from './pgPool';
 
@@ -12,7 +12,7 @@ export class PgDeviceRepository implements IDeviceRepository {
     deviceId: string,
     deviceType: string,
     encryptedDevice?: string,
-  ): Promise<DeviceCryptoOutput> {
+  ): Promise<DeviceIdentifyOutput> {
     const pool = getPool();
     const { key, iv } = generateDeviceCrypto();
 
@@ -31,9 +31,8 @@ export class PgDeviceRepository implements IDeviceRepository {
     );
 
     const certifiedId = result.rows[0]?.id ?? 1;
-    const auth_token = signDeviceToken({ deviceId, certifiedId });
 
-    return { key, iv, certified_id: certifiedId, auth_token };
+    return { key, iv, certified_id: certifiedId };
   }
 
   async authenticateDevice(

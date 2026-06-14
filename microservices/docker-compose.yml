@@ -77,7 +77,7 @@ services:
       - '3001:3001'
     environment:
       PORT: 3001
-      MOCK_MODE: 'true'
+      MOCK_MODE: 'false'
       NODE_ENV: development
       DB_HOST: device-db
       DB_PORT: 5432
@@ -101,7 +101,7 @@ services:
       - '3002:3002'
     environment:
       PORT: 3002
-      MOCK_MODE: 'true'
+      MOCK_MODE: 'false'
       NODE_ENV: development
       DB_HOST: customer-db
       DB_PORT: 5432

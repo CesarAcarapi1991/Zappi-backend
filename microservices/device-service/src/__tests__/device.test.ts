@@ -1,6 +1,5 @@
 // ─── Device Service Tests ─────────────────────────────────────────────────────
-// Tests for all endpoints defined in "Documentación API - Billetera Móvil.pdf"
-// Covers: Device Identification, Device Authentication
+// Tests for the /v1/device-identify and auth endpoints.
 // Uses MockDeviceRepository so no real DB/AWS connections needed.
 
 import request from 'supertest';
@@ -33,6 +32,9 @@ const validAuthPayload = {
   send_id: 'SEND-001',
 };
 
+// Regex: decimal values 0-255 separated by pipes  e.g.  "58|210|67|147|..."
+const DECIMAL_PIPED = /^\d{1,3}(\|\d{1,3})*$/;
+
 // =============================================================================
 // 1. HEALTH CHECK
 // =============================================================================
@@ -47,98 +49,73 @@ describe('Device Service - Health Check', () => {
 });
 
 // =============================================================================
-// 2. DEVICE IDENTIFICATION — PDF: POST /V1/device/identification
+// 2. DEVICE IDENTIFICATION — POST /v1/device-identify
 // =============================================================================
 describe('Device Service - Device Identification', () => {
-  const endpoints = [
-    '/V1/device/identification',
-    '/V2/device/identification',
-    '/V1/device-identify',
-    '/V2/device-identify',
-    '/v1/device-identify',
-    '/v2/device-identify',
-  ];
+  describe('POST /v1/device-identify', () => {
+    it('returns 200 with key, iv, and certified_id on valid request (without auth_token)', async () => {
+      const res = await request(app)
+        .post('/v1/device-identify')
+        .send(validIdentifyPayload);
 
-  endpoints.forEach((url) => {
-    describe(`POST ${url}`, () => {
-      it('returns 200 with key, iv, certified_id, and auth_token on valid request', async () => {
-        const res = await request(app)
-          .post(url)
-          .send(validIdentifyPayload);
+      expect(res.status).toBe(200);
+      expect(res.body.state).toBe(0);
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.key).toBeDefined();
+      expect(res.body.data.iv).toBeDefined();
+      expect(res.body.data.certified_id).toBeDefined();
+      expect(res.body.data.auth_token).toBeUndefined();
 
-        expect(res.status).toBe(200);
-        expect(res.body.state).toBe(0);
-        expect(res.body.data).toBeDefined();
-        expect(res.body.data.key).toBeDefined();
-        expect(res.body.data.iv).toBeDefined();
-        expect(res.body.data.certified_id).toBeDefined();
-        expect(res.body.data.auth_token).toBeDefined();
-        expect(typeof res.body.data.auth_token).toBe('string');
+      // key: 32 decimal segments, iv: 16 decimal segments
+      expect(res.body.data.key).toMatch(DECIMAL_PIPED);
+      expect(res.body.data.iv).toMatch(DECIMAL_PIPED);
+      expect(res.body.data.key.split('|')).toHaveLength(32);
+      expect(res.body.data.iv.split('|')).toHaveLength(16);
+    });
 
-        // Verify key and iv formats
-        const isV2 = url.toLowerCase().includes('v2');
-        if (isV2) {
-          expect(res.body.data.key).toMatch(/^[0-9a-fA-F]{2}(\|[0-9a-fA-F]{2})*$/);
-          expect(res.body.data.iv).toMatch(/^[0-9a-fA-F]{2}(\|[0-9a-fA-F]{2})*$/);
-        } else {
-          expect(res.body.data.key).toMatch(/^[0-9a-fA-F]+$/);
-          expect(res.body.data.iv).toMatch(/^[0-9a-fA-F]+$/);
-        }
-      });
+    it('returns 400 if device_id is missing (validation error)', async () => {
+      const { device_id: _, ...payload } = validIdentifyPayload;
+      const res = await request(app).post('/v1/device-identify').send(payload);
 
-      it('returns 400 if device_id is missing (validation error)', async () => {
-        const { device_id: _, ...payload } = validIdentifyPayload;
-        const res = await request(app)
-          .post(url)
-          .send(payload);
+      expect(res.status).toBe(400);
+      expect(res.body.state).toBe(-2);
+    });
 
-        expect(res.status).toBe(400);
-        expect(res.body.state).toBe(-2);
-      });
+    it('returns 400 if device_type is missing', async () => {
+      const { device_type: _, ...payload } = validIdentifyPayload;
+      const res = await request(app).post('/v1/device-identify').send(payload);
 
-      it('returns 400 if device_type is missing', async () => {
-        const { device_type: _, ...payload } = validIdentifyPayload;
-        const res = await request(app)
-          .post(url)
-          .send(payload);
+      expect(res.status).toBe(400);
+      expect(res.body.state).toBe(-2);
+    });
 
-        expect(res.status).toBe(400);
-        expect(res.body.state).toBe(-2);
-      });
+    it('returns 400 if product is missing', async () => {
+      const { product: _, ...payload } = validIdentifyPayload;
+      const res = await request(app).post('/v1/device-identify').send(payload);
 
-      it('returns 400 if product is missing', async () => {
-        const { product: _, ...payload } = validIdentifyPayload;
-        const res = await request(app)
-          .post(url)
-          .send(payload);
+      expect(res.status).toBe(400);
+      expect(res.body.state).toBe(-2);
+    });
 
-        expect(res.status).toBe(400);
-        expect(res.body.state).toBe(-2);
-      });
+    it('returns consistent certified_id for the same device_id', async () => {
+      const res1 = await request(app).post('/v1/device-identify').send(validIdentifyPayload);
+      const res2 = await request(app).post('/v1/device-identify').send(validIdentifyPayload);
 
-      it('returns consistent certified_id for the same device_id', async () => {
-        const res1 = await request(app).post(url).send(validIdentifyPayload);
-        const res2 = await request(app).post(url).send(validIdentifyPayload);
+      expect(res1.body.data.certified_id).toBe(res2.body.data.certified_id);
+    });
 
-        expect(res1.body.data.certified_id).toBe(res2.body.data.certified_id);
-      });
+    it('returns 200 for a different device_id', async () => {
+      const res = await request(app)
+        .post('/v1/device-identify')
+        .send({ ...validIdentifyPayload, device_id: 'DIFFERENT-DEVICE-999' });
 
-      it('returns different certified_ids for different device_ids', async () => {
-        const res1 = await request(app).post(url).send(validIdentifyPayload);
-        const res2 = await request(app)
-          .post(url)
-          .send({ ...validIdentifyPayload, device_id: 'DIFFERENT-DEVICE-999' });
-
-        // Both succeed
-        expect(res1.status).toBe(200);
-        expect(res2.status).toBe(200);
-      });
+      expect(res.status).toBe(200);
     });
   });
 });
 
 // =============================================================================
-// 3. DEVICE AUTHENTICATION — PDF: POST /V1/device/authenticate
+// 3. DEVICE AUTHENTICATION
 // =============================================================================
 describe('Device Service - Device Authentication', () => {
   const endpoints = [
@@ -152,37 +129,20 @@ describe('Device Service - Device Authentication', () => {
 
   endpoints.forEach((url) => {
     describe(`POST ${url}`, () => {
-      it('returns 200 with key, iv, certified_id, and auth_token on valid request', async () => {
-        // First identify (register) the device
-        await request(app).post('/V1/device/identification').send(validIdentifyPayload);
-
-        const res = await request(app)
-          .post(url)
-          .send(validAuthPayload);
+      it('returns 200 with decimal-piped key and iv on valid request', async () => {
+        const res = await request(app).post(url).send(validAuthPayload);
 
         expect(res.status).toBe(200);
         expect(res.body.state).toBe(0);
-        expect(res.body.data.key).toBeDefined();
-        expect(res.body.data.iv).toBeDefined();
+        expect(res.body.data.key).toMatch(DECIMAL_PIPED);
+        expect(res.body.data.iv).toMatch(DECIMAL_PIPED);
         expect(res.body.data.certified_id).toBeDefined();
         expect(res.body.data.auth_token).toBeDefined();
-
-        // Verify key and iv formats
-        const isV2 = url.toLowerCase().includes('v2');
-        if (isV2) {
-          expect(res.body.data.key).toMatch(/^[0-9a-fA-F]{2}(\|[0-9a-fA-F]{2})*$/);
-          expect(res.body.data.iv).toMatch(/^[0-9a-fA-F]{2}(\|[0-9a-fA-F]{2})*$/);
-        } else {
-          expect(res.body.data.key).toMatch(/^[0-9a-fA-F]+$/);
-          expect(res.body.data.iv).toMatch(/^[0-9a-fA-F]+$/);
-        }
       });
 
       it('returns 400 if device_id is missing', async () => {
         const { device_id: _, ...payload } = validAuthPayload;
-        const res = await request(app)
-          .post(url)
-          .send(payload);
+        const res = await request(app).post(url).send(payload);
 
         expect(res.status).toBe(400);
         expect(res.body.state).toBe(-2);
@@ -190,22 +150,18 @@ describe('Device Service - Device Authentication', () => {
 
       it('returns 400 if device_type is missing', async () => {
         const { device_type: _, ...payload } = validAuthPayload;
-        const res = await request(app)
-          .post(url)
-          .send(payload);
+        const res = await request(app).post(url).send(payload);
 
         expect(res.status).toBe(400);
         expect(res.body.state).toBe(-2);
       });
 
       it('auth_token is a valid JWT string', async () => {
-        const res = await request(app)
-          .post(url)
-          .send(validAuthPayload);
+        const res = await request(app).post(url).send(validAuthPayload);
 
         expect(res.status).toBe(200);
         const parts = res.body.data.auth_token.split('.');
-        expect(parts).toHaveLength(3); // JWT has 3 parts
+        expect(parts).toHaveLength(3);
       });
     });
   });
@@ -221,8 +177,8 @@ describe('Device Service - 404 Not Found', () => {
     expect(res.body.state).toBe(-4);
   });
 
-  it('returns 404 for GET on identification endpoint', async () => {
-    const res = await request(app).get('/V1/device/identification');
+  it('returns 404 for GET on identify endpoint', async () => {
+    const res = await request(app).get('/v1/device-identify');
     expect(res.status).toBe(404);
   });
 });

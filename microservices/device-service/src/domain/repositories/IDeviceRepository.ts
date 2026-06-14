@@ -2,7 +2,7 @@
 // Defines the contract that all repository implementations must fulfil.
 // The Use Cases depend ONLY on this interface (Dependency Inversion Principle).
 
-import { DeviceCryptoOutput } from '../entities/Device';
+import { DeviceIdentifyOutput, DeviceCryptoOutput } from '../entities/Device';
 
 export interface IDeviceRepository {
   /**
@@ -13,7 +13,7 @@ export interface IDeviceRepository {
     deviceId: string,
     deviceType: string,
     encryptedDevice?: string,
-  ): Promise<DeviceCryptoOutput>;
+  ): Promise<DeviceIdentifyOutput>;
 
   /**
    * Authenticate an already-registered device.

@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS devices (
   device_id      VARCHAR(255) UNIQUE NOT NULL,
   device_type    VARCHAR(50)  NOT NULL,
   encrypted_device TEXT,
-  key            VARCHAR(64)  NOT NULL DEFAULT '',
-  iv             VARCHAR(32)  NOT NULL DEFAULT '',
+  key            VARCHAR(128) NOT NULL DEFAULT '',
+  iv             VARCHAR(64)  NOT NULL DEFAULT '',
   created_at     TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
   updated_at     TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );

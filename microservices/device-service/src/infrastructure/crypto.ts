@@ -9,12 +9,23 @@ const DEVICE_JWT_SECRET = process.env.JWT_DEVICE_SECRET ?? 'zappi-device-secret-
 const DEVICE_TOKEN_EXPIRY = '30m';
 
 /**
- * Generate a random AES-256 key (32 bytes) and IV (16 bytes) as hex strings.
+ * Generate a random AES-256 key (32 bytes) and IV (16 bytes).
+ * Format: decimal values (0-255) separated by pipes, e.g. "58|210|67|147|..."
+ * Compatible with Java's Integer.valueOf() decimal parsing.
  */
 export function generateDeviceCrypto(): { key: string; iv: string } {
-  const key = crypto.randomBytes(32).toString('hex');
-  const iv = crypto.randomBytes(16).toString('hex');
-  return { key, iv };
+  const keyBytes = crypto.randomBytes(32);
+  const ivBytes  = crypto.randomBytes(16);
+
+  const toDecimalPiped = (bytes: Buffer): string =>
+    Array.from(bytes)
+      .map(b => b.toString(10))
+      .join('|');
+
+  return {
+    key: toDecimalPiped(keyBytes),
+    iv:  toDecimalPiped(ivBytes),
+  };
 }
 
 /**

@@ -36,6 +36,12 @@ export interface DeviceAuthInput {
   send_id?: string;
 }
 
+export interface DeviceIdentifyOutput {
+  key: string;
+  iv: string;
+  certified_id: number;
+}
+
 export interface DeviceCryptoOutput {
   key: string;
   iv: string;

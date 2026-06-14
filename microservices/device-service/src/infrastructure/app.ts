@@ -59,13 +59,7 @@ export function createApp(): express.Application {
   });
 
   // ── Device Routes ─────────────────────────────────────────────────────────
-  // POST /V1/device/identification & /V2/device/identification — No auth required (first contact)
-  app.post('/V1/device/identification', deviceIdentifyHandler(repo));
-  app.post('/V2/device/identification', deviceIdentifyHandler(repo));
-  app.post('/V1/device-identify', deviceIdentifyHandler(repo));
-  app.post('/V2/device-identify', deviceIdentifyHandler(repo));
   app.post('/v1/device-identify', deviceIdentifyHandler(repo));
-  app.post('/v2/device-identify', deviceIdentifyHandler(repo));
 
   // POST /V1/device/authenticate & /V2/device/authenticate — No device token required (re-authentication)
   app.post('/V1/device/authenticate', deviceAuthHandler(repo));

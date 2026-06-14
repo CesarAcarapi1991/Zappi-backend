@@ -4,7 +4,7 @@
 // No real database connection needed — perfect for frontend integration testing.
 
 import { IDeviceRepository } from '../../../domain/repositories/IDeviceRepository';
-import { DeviceCryptoOutput } from '../../../domain/entities/Device';
+import { DeviceCryptoOutput, DeviceIdentifyOutput } from '../../../domain/entities/Device';
 import { generateDeviceCrypto, signDeviceToken } from '../../../infrastructure/crypto';
 
 export class MockDeviceRepository implements IDeviceRepository {
@@ -16,7 +16,7 @@ export class MockDeviceRepository implements IDeviceRepository {
     deviceId: string,
     deviceType: string,
     _encryptedDevice?: string,
-  ): Promise<DeviceCryptoOutput> {
+  ): Promise<DeviceIdentifyOutput> {
     // Assign or retrieve a mock certified_id for this device
     if (!this.store.has(deviceId)) {
       this.store.set(deviceId, { certifiedId: this.nextId++ });
@@ -24,9 +24,8 @@ export class MockDeviceRepository implements IDeviceRepository {
     const { certifiedId } = this.store.get(deviceId)!;
 
     const { key, iv } = generateDeviceCrypto();
-    const auth_token = signDeviceToken({ deviceId, certifiedId });
 
-    return { key, iv, certified_id: certifiedId, auth_token };
+    return { key, iv, certified_id: certifiedId };
   }
 
   async authenticateDevice(
