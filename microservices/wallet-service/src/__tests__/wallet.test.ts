@@ -43,12 +43,8 @@ describe('Wallet Service - Health Check', () => {
 // =============================================================================
 describe('Wallet Service - Wallet Balances', () => {
   const endpoints = [
-    '/V1/client/walletcards/information/get',
-    '/V2/client/walletcards/information/get',
     '/v1/client/walletcards/information/get',
-    '/v2/client/walletcards/information/get',
-    '/V1/balances',
-    '/V2/balances',
+    '/v1/balances',
   ];
 
   endpoints.forEach((url) => {
@@ -76,12 +72,8 @@ describe('Wallet Service - Wallet Balances', () => {
 // =============================================================================
 describe('Wallet Service - Recharge Parameters', () => {
   const endpoints = [
-    '/V1/recharge/parameters/get',
-    '/V2/recharge/parameters/get',
     '/v1/recharge/parameters/get',
-    '/v2/recharge/parameters/get',
-    '/V1/recharge-params',
-    '/V2/recharge-params',
+    '/v1/recharge-params',
   ];
 
   endpoints.forEach((url) => {
@@ -101,12 +93,8 @@ describe('Wallet Service - Recharge Parameters', () => {
 // =============================================================================
 describe('Wallet Service - Recharge Entel', () => {
   const endpoints = [
-    '/V1/recharge/entel',
-    '/V2/recharge/entel',
     '/v1/recharge/entel',
-    '/v2/recharge/entel',
-    '/V1/recharge-entel',
-    '/V2/recharge-entel',
+    '/v1/recharge-entel',
   ];
 
   const validPayload = { cellphone: '71234567', amount: 20 };
@@ -144,12 +132,8 @@ describe('Wallet Service - Recharge Entel', () => {
 // =============================================================================
 describe('Wallet Service - Recharge Tigo', () => {
   const endpoints = [
-    '/V1/recharge/tigo',
-    '/V2/recharge/tigo',
     '/v1/recharge/tigo',
-    '/v2/recharge/tigo',
-    '/V1/recharge-tigo',
-    '/V2/recharge-tigo',
+    '/v1/recharge-tigo',
   ];
 
   const validPayload = { cellphone: '72345678', amount: 15 };
@@ -181,12 +165,8 @@ describe('Wallet Service - Recharge Tigo', () => {
 // =============================================================================
 describe('Wallet Service - Recharge Viva', () => {
   const endpoints = [
-    '/V1/recharge/viva',
-    '/V2/recharge/viva',
     '/v1/recharge/viva',
-    '/v2/recharge/viva',
-    '/V1/recharge-viva',
-    '/V2/recharge-viva',
+    '/v1/recharge-viva',
   ];
 
   const validPayload = { cellphone: '73456789', amount: 10 };
@@ -219,12 +199,8 @@ describe('Wallet Service - Recharge Viva', () => {
 // =============================================================================
 describe('Wallet Service - Transfer Validate', () => {
   const endpoints = [
-    '/V1/transfers/validate',
-    '/V2/transfers/validate',
     '/v1/transfers/validate',
-    '/v2/transfers/validate',
-    '/V1/transfers/users-validate',
-    '/V2/transfers/users-validate',
+    '/v1/transfers/users-validate',
   ];
 
   endpoints.forEach((url) => {
@@ -257,12 +233,8 @@ describe('Wallet Service - Transfer Validate', () => {
 // =============================================================================
 describe('Wallet Service - Transfer Token Generate', () => {
   const endpoints = [
-    '/V1/transfers/token/generate',
-    '/V2/transfers/token/generate',
     '/v1/transfers/token/generate',
-    '/v2/transfers/token/generate',
-    '/V1/token-generate',
-    '/V2/token-generate',
+    '/v1/token-generate',
   ];
 
   const validPayload = { cellphone: '70000099', amount: 50 };
@@ -300,25 +272,21 @@ describe('Wallet Service - Transfer Token Generate', () => {
 // =============================================================================
 describe('Wallet Service - Transfer Execute', () => {
   const endpoints = [
-    '/V1/transfers/execute',
-    '/V2/transfers/execute',
     '/v1/transfers/execute',
-    '/v2/transfers/execute',
-    '/V1/transfers-execute',
-    '/V2/transfers-execute',
+    '/v1/transfers-execute',
   ];
 
   it('Full transfer flow: token generate → execute → 200', async () => {
     // Step 1: Generate token
     const tokenRes = await request(app)
-      .post('/V1/transfers/token/generate')
+      .post('/v1/transfers/token/generate')
       .send(withAuth({ cellphone: '70000099', amount: 50 }, 3));
     expect(tokenRes.status).toBe(200);
     const token = tokenRes.body.data.token;
 
     // Step 2: Execute transfer using generated token
     const execRes = await request(app)
-      .post('/V1/transfers/execute')
+      .post('/v1/transfers/execute')
       .send(withAuth({ cellphone: '70000099', amount: 50, token }, 3));
     expect(execRes.status).toBe(200);
     expect(execRes.body.state).toBe(0);
@@ -347,10 +315,7 @@ describe('Wallet Service - Transfer Execute', () => {
 // =============================================================================
 describe('Wallet Service - Movements History', () => {
   const endpoints = [
-    '/V1/movements',
-    '/V2/movements',
     '/v1/movements',
-    '/v2/movements',
   ];
 
   endpoints.forEach((url) => {

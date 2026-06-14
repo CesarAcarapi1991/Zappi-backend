@@ -129,7 +129,7 @@ services:
       - '3003:3003'
     environment:
       PORT: 3003
-      MOCK_MODE: 'true'
+      MOCK_MODE: 'false'
       NODE_ENV: development
       DB_HOST: wallet-db
       DB_PORT: 5432

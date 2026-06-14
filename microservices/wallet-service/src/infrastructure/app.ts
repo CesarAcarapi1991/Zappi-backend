@@ -6,7 +6,6 @@ import { IWalletRepository } from '../domain/repositories/IWalletRepository';
 import { MockWalletRepository } from '../adapters/repositories/mock/MockWalletRepository';
 import { PgWalletRepository } from '../adapters/repositories/postgres/PgWalletRepository';
 import { requireBodyDeviceToken } from './middleware/bodyAuthMiddleware';
-import { requireHeaderDeviceToken } from './middleware/headerAuthMiddleware';
 import {
   getBalancesHandler,
   getRechargeParamsHandler,
@@ -69,51 +68,24 @@ export function createApp(): express.Application {
   // Internal route (called internally by customer-service, no V1/V2 prefix needed)
   app.post('/internal/wallet/create', createInternalWalletHandler(repo));
 
-  // Register public routes (both V1 and V2, upper and lower case)
-  const v1Versions = ['V1', 'v1'];
-  const v2Versions = ['V2', 'v2'];
-
-  // V1 Routes - Require body token
-  v1Versions.forEach(v => {
-    app.post(`/${v}/client/walletcards/information/get`, requireBodyDeviceToken, getBalancesHandler(repo));
-    app.post(`/${v}/balances`, requireBodyDeviceToken, getBalancesHandler(repo));
-    app.post(`/${v}/recharge/parameters/get`, requireBodyDeviceToken, getRechargeParamsHandler(repo));
-    app.post(`/${v}/recharge-params`, requireBodyDeviceToken, getRechargeParamsHandler(repo));
-    app.post(`/${v}/recharge/entel`, requireBodyDeviceToken, rechargeEntelHandler(repo));
-    app.post(`/${v}/recharge/tigo`, requireBodyDeviceToken, rechargeTigoHandler(repo));
-    app.post(`/${v}/recharge/viva`, requireBodyDeviceToken, rechargeVivaHandler(repo));
-    app.post(`/${v}/recharge-entel`, requireBodyDeviceToken, rechargeEntelHandler(repo));
-    app.post(`/${v}/recharge-tigo`, requireBodyDeviceToken, rechargeTigoHandler(repo));
-    app.post(`/${v}/recharge-viva`, requireBodyDeviceToken, rechargeVivaHandler(repo));
-    app.post(`/${v}/transfers/validate`, requireBodyDeviceToken, transferValidateHandler(repo));
-    app.post(`/${v}/transfers/users-validate`, requireBodyDeviceToken, transferValidateHandler(repo));
-    app.post(`/${v}/transfers/token/generate`, requireBodyDeviceToken, transferTokenGenerateHandler(repo));
-    app.post(`/${v}/token-generate`, requireBodyDeviceToken, transferTokenGenerateHandler(repo));
-    app.post(`/${v}/transfers/execute`, requireBodyDeviceToken, transferExecuteHandler(repo));
-    app.post(`/${v}/transfers-execute`, requireBodyDeviceToken, transferExecuteHandler(repo));
-    app.post(`/${v}/movements`, requireBodyDeviceToken, getMovementsHandler(repo));
-  });
-
-  // V2 Routes - Require header token
-  v2Versions.forEach(v => {
-    app.post(`/${v}/client/walletcards/information/get`, requireHeaderDeviceToken, getBalancesHandler(repo));
-    app.post(`/${v}/balances`, requireHeaderDeviceToken, getBalancesHandler(repo));
-    app.post(`/${v}/recharge/parameters/get`, requireHeaderDeviceToken, getRechargeParamsHandler(repo));
-    app.post(`/${v}/recharge-params`, requireHeaderDeviceToken, getRechargeParamsHandler(repo));
-    app.post(`/${v}/recharge/entel`, requireHeaderDeviceToken, rechargeEntelHandler(repo));
-    app.post(`/${v}/recharge/tigo`, requireHeaderDeviceToken, rechargeTigoHandler(repo));
-    app.post(`/${v}/recharge/viva`, requireHeaderDeviceToken, rechargeVivaHandler(repo));
-    app.post(`/${v}/recharge-entel`, requireHeaderDeviceToken, rechargeEntelHandler(repo));
-    app.post(`/${v}/recharge-tigo`, requireHeaderDeviceToken, rechargeTigoHandler(repo));
-    app.post(`/${v}/recharge-viva`, requireHeaderDeviceToken, rechargeVivaHandler(repo));
-    app.post(`/${v}/transfers/validate`, requireHeaderDeviceToken, transferValidateHandler(repo));
-    app.post(`/${v}/transfers/users-validate`, requireHeaderDeviceToken, transferValidateHandler(repo));
-    app.post(`/${v}/transfers/token/generate`, requireHeaderDeviceToken, transferTokenGenerateHandler(repo));
-    app.post(`/${v}/token-generate`, requireHeaderDeviceToken, transferTokenGenerateHandler(repo));
-    app.post(`/${v}/transfers/execute`, requireHeaderDeviceToken, transferExecuteHandler(repo));
-    app.post(`/${v}/transfers-execute`, requireHeaderDeviceToken, transferExecuteHandler(repo));
-    app.post(`/${v}/movements`, requireHeaderDeviceToken, getMovementsHandler(repo));
-  });
+  // Register public routes (only v1)
+  app.post('/v1/client/walletcards/information/get', requireBodyDeviceToken, getBalancesHandler(repo));
+  app.post('/v1/balances', requireBodyDeviceToken, getBalancesHandler(repo));
+  app.post('/v1/recharge/parameters/get', requireBodyDeviceToken, getRechargeParamsHandler(repo));
+  app.post('/v1/recharge-params', requireBodyDeviceToken, getRechargeParamsHandler(repo));
+  app.post('/v1/recharge/entel', requireBodyDeviceToken, rechargeEntelHandler(repo));
+  app.post('/v1/recharge/tigo', requireBodyDeviceToken, rechargeTigoHandler(repo));
+  app.post('/v1/recharge/viva', requireBodyDeviceToken, rechargeVivaHandler(repo));
+  app.post('/v1/recharge-entel', requireBodyDeviceToken, rechargeEntelHandler(repo));
+  app.post('/v1/recharge-tigo', requireBodyDeviceToken, rechargeTigoHandler(repo));
+  app.post('/v1/recharge-viva', requireBodyDeviceToken, rechargeVivaHandler(repo));
+  app.post('/v1/transfers/validate', requireBodyDeviceToken, transferValidateHandler(repo));
+  app.post('/v1/transfers/users-validate', requireBodyDeviceToken, transferValidateHandler(repo));
+  app.post('/v1/transfers/token/generate', requireBodyDeviceToken, transferTokenGenerateHandler(repo));
+  app.post('/v1/token-generate', requireBodyDeviceToken, transferTokenGenerateHandler(repo));
+  app.post('/v1/transfers/execute', requireBodyDeviceToken, transferExecuteHandler(repo));
+  app.post('/v1/transfers-execute', requireBodyDeviceToken, transferExecuteHandler(repo));
+  app.post('/v1/movements', requireBodyDeviceToken, getMovementsHandler(repo));
 
   // 404 fallback
   app.use((_req, res) => {

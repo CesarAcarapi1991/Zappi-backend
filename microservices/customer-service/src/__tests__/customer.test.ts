@@ -50,30 +50,12 @@ describe('Customer Service - Health Check', () => {
 // 1. GET EXTENSION CATALOG — PDF: POST /V1/client/device/register/extension/get
 // =============================================================================
 describe('Customer Service - Document Extension Catalog', () => {
-  const endpoints = [
-    '/V1/client/device/register/extension/get',
-    '/V2/client/device/register/extension/get',
-    '/v1/client/device/register/extension/get',
-    '/v2/client/device/register/extension/get',
-    '/V1/document-extensions',
-    '/V2/document-extensions',
-  ];
-
-  endpoints.forEach((url) => {
-    it(`POST ${url} → 200 with extension list`, async () => {
-      const res = await request(app).post(url).send(withAuth({}));
-      expect(res.status).toBe(200);
-      expect(res.body.state).toBe(0);
-      expect(Array.isArray(res.body.data.extensions)).toBe(true);
-      expect(res.body.data.extensions.length).toBeGreaterThan(0);
-    });
-  });
-
-  it('POST /V1/client/device/register/extension/get → 401 without auth_token', async () => {
-    const res = await request(app)
-      .post('/V1/client/device/register/extension/get')
-      .send({});
-    expect(res.status).toBe(401);
+  it('GET /v1/document-extensions → 200 with extension list', async () => {
+    const res = await request(app).get('/v1/document-extensions');
+    expect(res.status).toBe(200);
+    expect(res.body.state).toBe(0);
+    expect(Array.isArray(res.body.data.extensions)).toBe(true);
+    expect(res.body.data.extensions.length).toBeGreaterThan(0);
   });
 });
 
@@ -83,12 +65,8 @@ describe('Customer Service - Document Extension Catalog', () => {
 // =============================================================================
 describe('Customer Service - Validate User', () => {
   const endpoints = [
-    '/V1/register/validate/user',
-    '/V2/register/validate/user',
     '/v1/register/validate/user',
-    '/v2/register/validate/user',
-    '/V1/users-validate',
-    '/V2/users-validate',
+    '/v1/users-validate',
   ];
 
   const validPayload = {
@@ -134,18 +112,14 @@ describe('Customer Service - Validate User', () => {
 // =============================================================================
 describe('Customer Service - Validate OTP', () => {
   const endpoints = [
-    '/V1/register/validate/otp',
-    '/V2/register/validate/otp',
     '/v1/register/validate/otp',
-    '/v2/register/validate/otp',
-    '/V1/otp-generate',
-    '/V2/otp-generate',
+    '/v1/otp-generate',
   ];
 
   it('Full OTP flow: validate user → validate OTP → 200', async () => {
     // Step 1: Create user/OTP session first
     await request(app)
-      .post('/V1/register/validate/user')
+      .post('/v1/register/validate/user')
       .send(withAuth({
         cellphone: '77100100',
         document_number: '11122233',
@@ -155,7 +129,7 @@ describe('Customer Service - Validate OTP', () => {
 
     // Step 2: Now validate the OTP (mock uses '123456')
     const res = await request(app)
-      .post('/V1/register/validate/otp')
+      .post('/v1/register/validate/otp')
       .send(withAuth({ cellphone: '77100100', otp_code: '123456' }));
 
     expect([200, 400]).toContain(res.status); // 200 if OTP matches
@@ -184,12 +158,8 @@ describe('Customer Service - Validate OTP', () => {
 // =============================================================================
 describe('Customer Service - Init Face Recognition', () => {
   const endpoints = [
-    '/V1/register/init/face/recognition',
-    '/V2/register/init/face/recognition',
     '/v1/register/init/face/recognition',
-    '/v2/register/init/face/recognition',
-    '/V1/face-recognition-init',
-    '/V2/face-recognition-init',
+    '/v1/face-recognition-init',
   ];
 
   const validPayload = {
@@ -230,18 +200,14 @@ describe('Customer Service - Init Face Recognition', () => {
 // =============================================================================
 describe('Customer Service - Execute Face Recognition', () => {
   const endpoints = [
-    '/V1/register/execute/face/recognition',
-    '/V2/register/execute/face/recognition',
     '/v1/register/execute/face/recognition',
-    '/v2/register/execute/face/recognition',
-    '/V1/face-recognition-valid',
-    '/V2/face-recognition-valid',
+    '/v1/face-recognition-valid',
   ];
 
   it('Full face flow: init → execute → 200', async () => {
     // Step 1: Init face session
     const initRes = await request(app)
-      .post('/V1/register/init/face/recognition')
+      .post('/v1/register/init/face/recognition')
       .send(withAuth({
         cellphone: '77200200',
         document_number: '22233344',
@@ -252,7 +218,7 @@ describe('Customer Service - Execute Face Recognition', () => {
 
     // Step 2: Execute with the session ID
     const execRes = await request(app)
-      .post('/V1/register/execute/face/recognition')
+      .post('/v1/register/execute/face/recognition')
       .send(withAuth({
         cellphone: '77200200',
         selfie: 'base64imagedata==',
@@ -284,12 +250,8 @@ describe('Customer Service - Execute Face Recognition', () => {
 // =============================================================================
 describe('Customer Service - Register Reference Code', () => {
   const endpoints = [
-    '/V1/client/reference/register/code',
-    '/V2/client/reference/register/code',
     '/v1/client/reference/register/code',
-    '/v2/client/reference/register/code',
-    '/V1/reference/register',
-    '/V2/reference/register',
+    '/v1/reference/register',
   ];
 
   // ReferenceRegisterUseCase schema: { id: number, code: string, auth_token: string }
@@ -324,12 +286,8 @@ describe('Customer Service - Register Reference Code', () => {
 // =============================================================================
 describe('Customer Service - Create Account', () => {
   const endpoints = [
-    '/V1/register/create/account',
-    '/V2/register/create/account',
     '/v1/register/create/account',
-    '/v2/register/create/account',
-    '/V1/users-create',
-    '/V2/users-create',
+    '/v1/users-create',
   ];
 
   const validPayload = {
@@ -364,12 +322,8 @@ describe('Customer Service - Create Account', () => {
 // =============================================================================
 describe('Customer Service - Login (Sign In)', () => {
   const endpoints = [
-    '/V1/client/login/get',
-    '/V2/client/login/get',
     '/v1/client/login/get',
-    '/v2/client/login/get',
-    '/V1/sign-in',
-    '/V2/sign-in',
+    '/v1/sign-in',
   ];
 
   const validPayload = {
@@ -427,12 +381,8 @@ describe('Customer Service - Login (Sign In)', () => {
 // =============================================================================
 describe('Customer Service - Profile Parameters', () => {
   const endpoints = [
-    '/V1/profile/parameters/get',
-    '/V2/profile/parameters/get',
     '/v1/profile/parameters/get',
-    '/v2/profile/parameters/get',
-    '/V1/parameters',
-    '/V2/parameters',
+    '/v1/parameters',
   ];
 
   endpoints.forEach((url) => {
@@ -454,8 +404,7 @@ describe('Customer Service - Profile Parameters', () => {
 // 10. WELCOME REFERENCE — PDF: POST /V1/client/reference/welcome (intentional 404)
 // =============================================================================
 describe('Customer Service - Welcome Reference (Intentional 404 per PDF spec)', () => {
-  ['/V1/client/reference/welcome', '/V2/client/reference/welcome',
-   '/v1/client/reference/welcome', '/v2/client/reference/welcome'].forEach((url) => {
+  ['/v1/client/reference/welcome'].forEach((url) => {
     it(`POST ${url} → 404`, async () => {
       const res = await request(app).post(url).send(withAuth({}));
       expect(res.status).toBe(404);
