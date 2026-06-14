@@ -61,13 +61,7 @@ export function createApp(): express.Application {
   // ── Device Routes ─────────────────────────────────────────────────────────
   app.post('/v1/device-identify', deviceIdentifyHandler(repo));
 
-  // POST /V1/device/authenticate & /V2/device/authenticate — No device token required (re-authentication)
-  app.post('/V1/device/authenticate', deviceAuthHandler(repo));
-  app.post('/V2/device/authenticate', deviceAuthHandler(repo));
-  app.post('/V1/device-auth', deviceAuthHandler(repo));
-  app.post('/V2/device-auth', deviceAuthHandler(repo));
   app.post('/v1/device-auth', deviceAuthHandler(repo));
-  app.post('/v2/device-auth', deviceAuthHandler(repo));
 
   // ── 404 handler ───────────────────────────────────────────────────────────
   app.use((_req, res) => {
