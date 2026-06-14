@@ -190,11 +190,13 @@ export interface WalletCard {
   id: number;
   account: AccountInfo;
   balance: number;
-  pan: string;
-  expiration_date: string;
-  code: string;
-  image: string;
   enable: boolean;
+
+  // pan: string;
+  // expiration_date: string;
+  // code: string;
+  // image: string;
+  
 }
 
 export interface WalletAction {
@@ -205,7 +207,7 @@ export interface WalletAction {
   description: string;
   detail: string;
   destination_account: string;
-  destination_account_name: string | null;
+  // destination_account_name: string | null;
 }
 
 export interface WalletCardsData {
@@ -242,4 +244,104 @@ export interface DbDevice {
   encrypted_device: string;
   user_id: number | null;
   created_at: Date;
+}
+
+
+//recharge-params
+export interface DatasetRechargeParams{
+  recharge_amounts: RechargeAmount[];
+}
+export interface RechargeAmount {
+  company_name: string;
+  amounts: Amount[];
+}
+export interface Amount {
+  name: string;
+  value: number;
+}
+
+//recharge-entel  |  /v1/recharge-tigo  |  /v1/recharge-viva
+export interface DataRecharge {
+  account_type: string;
+  bill_name: string;
+  bill_nit: string;
+  code: string;
+  currency: string;
+  origin_account: string;
+  total_amount: number;
+  certified_id: number;
+  pin: string;
+}
+export interface DatasetRecharge {
+  code: string;
+  transaction_id: number;
+  date: string;
+}
+
+
+//transfers/users-validate
+export interface DataUsersValidate {
+  account: string;
+}
+export interface DatasetUsersValidate {
+  number: string;
+  currency: string;
+  type: string;
+  name: string;
+  last_name: string;
+  second_last_name: string;
+  document_number: string;
+  document_extension: string;
+}
+
+
+//token-generate
+export interface DataTokenGenerate {
+  certified_id: number;
+  pin: string;
+}
+export interface DatasetTokenGenerate {
+  token: string;
+  expiry_time: number;
+}
+
+
+//transfers-execute
+export interface DataTransfersExecute {
+  amount: number;
+  certified_id: number;
+  currency: string;
+  origin_account: string;
+  pin: string;
+  target_account: string;
+  target_account_name: string;
+  token: string;
+  private_token: string;
+  auth_token: string;
+}
+export interface DatasetTransfersExecute {
+  code: string;
+  transaction_id: number;
+  date: string;
+}
+
+
+
+//Movements
+export interface DataMovements {
+  account: string;
+  private_token: string;
+  auth_token: string;
+}
+export interface DatasetMovements {
+  balance: number;
+  movements: Movement[];
+}
+
+export interface Movement {
+  date: string;
+  amount: number;
+  currency: string;
+  description: string;
+  detail: string;
 }

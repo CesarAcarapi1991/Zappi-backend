@@ -22,10 +22,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
           type: 'BIL',
         },
         balance: 1250.50,
-        pan: '',
-        expiration_date: '',
-        code: '',
-        image: '',
         enable: true,
       },
     ];
@@ -38,8 +34,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         type: 12,
         description: 'BL PAGO TIGO',
         detail: 'Recarga de crédito',
-        destination_account: '77011223',
-        destination_account_name: null,
+        destination_account: '77011223'
       },
       {
         date: '2026-05-10 09:00',
@@ -48,8 +43,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         type: 12,
         description: 'BL PAGO TIGO',
         detail: 'Recarga de crédito',
-        destination_account: '77011223',
-        destination_account_name: null,
+        destination_account: '77011223'
       },
     ];
 
